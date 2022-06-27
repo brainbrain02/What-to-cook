@@ -1,0 +1,1 @@
+TEXT_FONT = ('Courier', 20)

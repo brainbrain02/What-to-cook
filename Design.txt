@@ -1,0 +1,15 @@
+function:
+    control and access the dishes database
+        modify existing database
+        select contents from database
+    draw dishes from the dishes database
+        draw and display on the window
+        label using grid
+    check the recipe of dishes draw
+        pop up a new window
+        find the name of dish
+        show the recipe
+
+
+
+help
