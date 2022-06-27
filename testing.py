@@ -1,5 +1,8 @@
-import random
-
-mylist = ["apple", "banana", "cherry"]
-
-print(random.choices(mylist, weights = [10, 1, 1], k = 14))
+myfile = open("Dishes database.txt", "r")
+mylist = myfile.readlines()
+z = []
+for i in mylist:
+    i = i.split("\n")[0]
+    z.append(i)
+print(z)
+myfile.close()

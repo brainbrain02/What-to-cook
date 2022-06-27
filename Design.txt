@@ -10,6 +10,3 @@ function:
         find the name of dish
         show the recipe
 
-
-
-help
