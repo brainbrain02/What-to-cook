@@ -15,6 +15,7 @@ class DishData:
             i = i.split("\n")[0]
             self._dishes.append(i)
         self._chosen_dish = None
+        self._chosen_dishes = []
         
     def draw_dish(self):
         """Try draw 1 dish"""
@@ -22,10 +23,12 @@ class DishData:
         self._chosen_dish = random.choices(self._dishes)
         # self._chosen_dishes = dish
         print(self._chosen_dish)
-        self._callback()
+        self._chosen_dishes.append(self._chosen_dish)
+        print(self._chosen_dishes)
+        # self._callback()
 
-    def set_callback(self, callback):
-        self._callback = callback
+    # def set_callback(self, callback):
+    #     self._callback = callback
         
 
 class RecipeData:
@@ -58,6 +61,7 @@ class ChosenDishView(tk.Frame):
     def __init__(self, master):
         super().__init__(bg="blue", width=500)
         self._master = master
+        self._label1 = tk.Label(self, text="Chosen One").pack()
 
     def draw_dish_label(self, name):
         var = tk.Label(self, text=name, font=TEXT_FONT)
@@ -65,20 +69,26 @@ class ChosenDishView(tk.Frame):
 
 class Controler(tk.Frame):
     """Controler"""
-    def __init__(self, master, data) -> None:
+    def __init__(self, master, data, dishes) -> None:
         super().__init__(bg="green")
         self._master = master
         self._data = data
-        self._callback = self._data.draw_dish
+        self._dishes = dishes
+        self._callback1 = self._data.draw_dish
+        self._callback2 = self._dishes.draw_dish_label
         self.draw_controller()
         self._no_draw = 0
+        self._new_dish = None
+
+    def yes(self):
+        self._new_dish = self._data._chosen_dish
 
     def draw_controller(self):
         # self._no_draw_entry = tk.Entry(self, width=20)
         # self._no_draw_entry.pack(side=tk.LEFT)
         # self._no_draw = self._no_draw_entry.get()
         # not yet check type of input
-        self._enter_btn = tk.Button(self, text="Enter", command=self._callback)
+        self._enter_btn = tk.Button(self, text="Enter", command=lambda:[self._callback1(), self.yes(), self._callback2(self._new_dish)])
         self._enter_btn.pack()
 
 def app():
@@ -88,16 +98,20 @@ def app():
     
     dish_data = DishData()
     
-    controller = Controler(root, dish_data)
-    controller.pack(side=tk.BOTTOM, fill=tk.X, ipady=20)
+    
 
     database_view = DatabaseView(root, dish_data)
     database_view.pack(side=tk.LEFT, fill=tk.Y)
 
     chosen_view = ChosenDishView(root)
-    chosen_view.pack(side=tk.RIGHT, fill=tk.Y)
+    chosen_view.pack(side=tk.TOP, fill=tk.BOTH)
 
-    dish_data.set_callback(chosen_view.draw_dish_label(dish_data._chosen_dish))
+    controller = Controler(root, dish_data, chosen_view)
+    controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
+
+    # dish_data.set_callback(chosen_view.draw_dish_label(dish_data._chosen_dish))
+
+
     
     root.mainloop()
 
