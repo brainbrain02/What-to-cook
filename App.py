@@ -1,4 +1,3 @@
-from inspect import ismethoddescriptor
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
@@ -70,7 +69,7 @@ class ChosenDishView(tk.Frame):
         var = tk.Label(self, text=name, font=TEXT_FONT)
         var.pack(side=tk.TOP, fill=tk.X)
 
-class Controler(tk.Frame):
+class Controller(tk.Frame):
     """Controler"""
     def __init__(self, master, data, dishes) -> None:
         super().__init__(bg="green")
@@ -129,12 +128,11 @@ def app():
     root.geometry("700x600")
     root.resizable(0, 0)
 
-    path = filedialog.askopenfilename()
+    FileMenu(root)
 
+    path = filedialog.askopenfilename()
     
     dish_data = DishData(path)
-    
-    
 
     database_view = DatabaseView(root, dish_data)
     database_view.pack(side=tk.LEFT, fill=tk.Y)
@@ -142,13 +140,9 @@ def app():
     chosen_view = ChosenDishView(root)
     chosen_view.pack(side=tk.TOP, fill=tk.BOTH)
 
-    controller = Controler(root, dish_data, chosen_view)
+    controller = Controller(root, dish_data, chosen_view)
     controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
 
-    FileMenu(root)
-
-
-    
     root.mainloop()
 
 if __name__ == '__main__':

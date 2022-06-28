@@ -1,12 +1,41 @@
 function:
-    control and access the dishes database
-        modify existing database
-        select contents from database
-    draw dishes from the dishes database
-        draw and display on the window
-        label using grid
-    check the recipe of dishes draw
-        pop up a new window
-        find the name of dish
-        show the recipe
+
+asking which database want to access
+    pop up a file choosing window when open the app (done)
+    and open that database and show all the dishes can be draw (done)
+
+    (
+        Important!!!!!!!
+        there should be 3 database
+        1: All the dishes
+        2: Dishes and there recipes
+        3: Dishes that haven't been drawn in the current cycle
+
+        database 3 should be open in most of the time
+        databse 1 should be open iff database 3 is empty
+    )
+
+    pop up a warning message if database 3 is empty
+    create a new database 3 (which should be a copy of database 1)
+    and save as database 3 (should be overwrite the prevvious file)
+
+modify existing database
+    add new dishes and recipes to database 1 & 2
+
+draw dishes from the dishes database
+    create a button (done)
+    click the button will draw and display on the window (done)
+    
+check the recipe of dishes
+    after draw a dish and click the dish label
+    a new window will pop up and show the related recipe
+
+save the newest database 3 automatically when close the app (TRY!!!)
+    pop up a window when quit or close the app window
+    which promt the user, app will be closed
+    iff yes is clicked, database 3 will be saved
+
+file menu bar (funciton may add to contorller)
+    change posibility
+
 
