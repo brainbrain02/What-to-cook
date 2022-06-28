@@ -1,4 +1,7 @@
+from inspect import ismethoddescriptor
 import tkinter as tk
+from tkinter import messagebox
+from tkinter import filedialog
 from Constants import *
 import random
 
@@ -7,8 +10,8 @@ class ControlDatabase:
 
 class DishData:
     """Get the dishes name from database and draw dishes"""
-    def __init__(self) -> None:
-        self._data = open("Dishes database.txt", "r")
+    def __init__(self, path) -> None:
+        self._data = open(path, "r")
         self._dishes = []
         self._all_dishes = self._data.readlines()
         for i in self._all_dishes:
@@ -91,12 +94,45 @@ class Controler(tk.Frame):
         self._enter_btn = tk.Button(self, text="Enter", command=lambda:[self._callback1(), self.yes(), self._callback2(self._new_dish)])
         self._enter_btn.pack()
 
+class FileMenu(DishData):
+    def __init__(self, master) -> None:
+        self._master = master
+        self.set_up_file_menu()
+
+    def set_up_file_menu(self):
+        menubar = tk.Menu(self._master)
+        self._master.config(menu=menubar)
+
+        filememu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=filememu)
+        filememu.add_command(label="Load File")
+        filememu.add_command(label="Save File")
+
+        actionmemu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Action", menu=actionmemu)
+        actionmemu.add_command(label="Change Posibility")
+        actionmemu.add_command(label="Quit", command=self._master.quit)
+
+    def load_file(self):
+        return
+
+    def save_file(self):
+        return
+
+    def change_posibility(self):
+        return
+
+
+
 def app():
     root = tk.Tk()
     root.geometry("700x600")
     root.resizable(0, 0)
+
+    path = filedialog.askopenfilename()
+
     
-    dish_data = DishData()
+    dish_data = DishData(path)
     
     
 
@@ -109,7 +145,7 @@ def app():
     controller = Controler(root, dish_data, chosen_view)
     controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
 
-    # dish_data.set_callback(chosen_view.draw_dish_label(dish_data._chosen_dish))
+    FileMenu(root)
 
 
     
