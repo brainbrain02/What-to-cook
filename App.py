@@ -9,28 +9,42 @@ class ControlDatabase:
 
 class DishData:
     """Get the dishes name from database and draw dishes"""
-    def __init__(self, path) -> None:
-        self._data = open(path, "r")
-        self._dishes = []
-        self._all_dishes = self._data.readlines()
-        for i in self._all_dishes:
-            i = i.split("\n")[0]
-            self._dishes.append(i)
+    def __init__(self) -> None:
         self._chosen_dish = None
         self._chosen_dishes = []
+        with open("Current Round.txt", "r") as self._data:
+            self._dishes = []
+            self._all_dishes = self._data.readlines()
+            for i in self._all_dishes:
+                i = i.split("\n")[0]
+                self._dishes.append(i)
+
         
     def draw_dish(self):
         """Try draw 1 dish"""
-        # print(self._dishes)
         self._chosen_dish = random.choices(self._dishes)
-        # self._chosen_dishes = dish
-        print(self._chosen_dish)
-        self._chosen_dishes.append(self._chosen_dish)
-        print(self._chosen_dishes)
-        # self._callback()
 
-    # def set_callback(self, callback):
-    #     self._callback = callback
+        print(self._dishes) #checking
+
+        print(self._chosen_dish) #checking
+        self._chosen_dishes.append(self._chosen_dish[0])
+        print(self._chosen_dishes) #checking
+
+        self._dishes.remove(self._chosen_dish[0])
+        print(self._dishes) #checking
+
+    def check_empty(self):
+        if self._dishes:
+            return False
+        else:
+            return True
+
+    def update_database(self):
+        with open("Current Round.txt", 'w') as f:
+            f.write('\n'.join(self._dishes))
+
+    
+        
         
 
 class RecipeData:
@@ -78,6 +92,7 @@ class Controller(tk.Frame):
         self._dishes = dishes
         self._callback1 = self._data.draw_dish
         self._callback2 = self._dishes.draw_dish_label
+        self._callback3 = self._data.check_empty
         self.draw_controller()
         self._no_draw = 0
         self._new_dish = None
@@ -123,6 +138,8 @@ class FileMenu(DishData):
 
 
 
+
+
 def app():
     root = tk.Tk()
     root.geometry("700x600")
@@ -130,9 +147,9 @@ def app():
 
     FileMenu(root)
 
-    path = filedialog.askopenfilename()
+    # path = filedialog.askopenfilename()
     
-    dish_data = DishData(path)
+    dish_data = DishData()
 
     database_view = DatabaseView(root, dish_data)
     database_view.pack(side=tk.LEFT, fill=tk.Y)
@@ -143,6 +160,13 @@ def app():
     controller = Controller(root, dish_data, chosen_view)
     controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
 
+    def on_closing():
+        if messagebox.askokcancel("Quit", "Do you want to quit?"):
+            dish_data.update_database()
+            print("Bye 9 Bye")
+            root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
 if __name__ == '__main__':

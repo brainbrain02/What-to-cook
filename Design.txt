@@ -19,6 +19,9 @@ asking which database want to access
     create a new database 3 (which should be a copy of database 1)
     and save as database 3 (should be overwrite the prevvious file)
 
+
+    USING Pickle to store dishes name and recipe
+
 modify existing database
     add new dishes and recipes to database 1 & 2
 
