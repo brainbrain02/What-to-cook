@@ -1,3 +1,4 @@
+from glob import glob
 import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
@@ -9,10 +10,11 @@ class ControlDatabase:
 
 class DishData:
     """Get the dishes name from database and draw dishes"""
-    def __init__(self) -> None:
+    def __init__(self, path) -> None:
+        self._path = path
         self._chosen_dish = None
         self._chosen_dishes = []
-        with open("Current Round.txt", "r") as self._data:
+        with open(self._path, "r", encoding="utf8") as self._data:
             self._dishes = []
             self._all_dishes = self._data.readlines()
             for i in self._all_dishes:
@@ -34,18 +36,39 @@ class DishData:
         print(self._dishes) #checking
 
     def check_empty(self):
+        """Check if the current drawing database is empty"""
         if self._dishes:
             return False
         else:
             return True
 
-    def update_database(self):
-        with open("Current Round.txt", 'w') as f:
-            f.write('\n'.join(self._dishes))
+    def enter_new_database(self):
+        """If the current drawing database is empty, clear all previous data and prompt user to enter a new database"""
+        if self.check_empty():
+            path = filedialog.askopenfilename(filetypes=(("Text files", "*.txt"), ("All files", "*.*")))
+            global dish_data
+            dish_data = DishData(path)
 
-    
-        
-        
+            global root
+            global database_view
+            database_view.clear()
+            database_view = DatabaseView(root, dish_data)
+            database_view.pack(side=tk.LEFT, fill=tk.Y)
+
+            global chosen_view
+            chosen_view.clear()
+            chosen_view = ChosenDishView(root)
+            chosen_view.pack(side=tk.TOP, fill=tk.BOTH)
+
+            global controller
+            controller.clear()
+            controller = Controller(root, dish_data, database_view, chosen_view)
+            controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
+
+    def update_database(self):
+        """Update the current database when close the program"""
+        with open("Current Round.txt", 'w', encoding="utf8") as f:
+            f.write('\n'.join(self._dishes))
 
 class RecipeData:
     pass
@@ -57,20 +80,28 @@ class DatabaseView(tk.Frame):
         self._master = master
         self._dish_data = dish_data
 
-        scroll_bar = tk.Scrollbar(self)
-        scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
+        self._scroll_bar = tk.Scrollbar(self)
+        self._scroll_bar.pack(side=tk.RIGHT, fill=tk.Y)
 
-        data_list = tk.Listbox(
+        self._data_list = tk.Listbox(
                 self, 
                 font=TEXT_FONT, 
                 selectmode=tk.EXTENDED, 
-                yscrollcommand=scroll_bar.set
+                yscrollcommand=self._scroll_bar.set
             )
         for dish in self._dish_data._dishes:
-            data_list.insert(tk.END, dish)
-        data_list.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
+            self._data_list.insert(tk.END, dish)
+        self._data_list.pack(side=tk.LEFT, expand=True, fill=tk.BOTH)
         
-        scroll_bar.config(command=data_list.yview)
+        self._scroll_bar.config(command=self._data_list.yview)
+
+    def clear(self):
+        self.destroy()
+
+    def just_draw(self):
+        self._data_list.delete(0, tk.END)
+        for dish in self._dish_data._dishes:
+            self._data_list.insert(tk.END, dish)
 
 class ChosenDishView(tk.Frame):
     """Show all chosen dishes"""
@@ -80,19 +111,25 @@ class ChosenDishView(tk.Frame):
         self._label1 = tk.Label(self, text="Chosen One").pack()
 
     def draw_dish_label(self, name):
+        """Draw dish name label on the screen"""
         var = tk.Label(self, text=name, font=TEXT_FONT)
         var.pack(side=tk.TOP, fill=tk.X)
 
+    def clear(self):
+        self.destroy()
+
 class Controller(tk.Frame):
     """Controler"""
-    def __init__(self, master, data, dishes) -> None:
+    def __init__(self, master, data, database, dishes) -> None:
         super().__init__(bg="green")
         self._master = master
         self._data = data
+        self._database = database
         self._dishes = dishes
         self._callback1 = self._data.draw_dish
         self._callback2 = self._dishes.draw_dish_label
-        self._callback3 = self._data.check_empty
+        self._callback3 = self._data.enter_new_database
+        self._callback4 = self._database.just_draw
         self.draw_controller()
         self._no_draw = 0
         self._new_dish = None
@@ -101,66 +138,62 @@ class Controller(tk.Frame):
         self._new_dish = self._data._chosen_dish
 
     def draw_controller(self):
+        """Draw control buttons on the screen"""
         # self._no_draw_entry = tk.Entry(self, width=20)
         # self._no_draw_entry.pack(side=tk.LEFT)
         # self._no_draw = self._no_draw_entry.get()
         # not yet check type of input
-        self._enter_btn = tk.Button(self, text="Enter", command=lambda:[self._callback1(), self.yes(), self._callback2(self._new_dish)])
+        self._enter_btn = tk.Button(self, text="Enter", command=lambda:[self._callback1(), self.yes(), self._callback2(self._new_dish), self._callback3(), self._callback4()])
         self._enter_btn.pack()
 
+    def clear(self):
+        self.destroy()
+
 class FileMenu(DishData):
-    def __init__(self, master) -> None:
+    def __init__(self, master, data) -> None:
         self._master = master
+        self._data = data
         self.set_up_file_menu()
 
     def set_up_file_menu(self):
+        """Set up file menu on the root window"""
         menubar = tk.Menu(self._master)
         self._master.config(menu=menubar)
-
-        filememu = tk.Menu(menubar, tearoff=0)
-        menubar.add_cascade(label="File", menu=filememu)
-        filememu.add_command(label="Load File")
-        filememu.add_command(label="Save File")
 
         actionmemu = tk.Menu(menubar, tearoff=0)
         menubar.add_cascade(label="Action", menu=actionmemu)
         actionmemu.add_command(label="Change Posibility")
-        actionmemu.add_command(label="Quit", command=self._master.quit)
+        actionmemu.add_command(label="Quit", command=self.quit)
 
-    def load_file(self):
-        return
-
-    def save_file(self):
-        return
-
-    def change_posibility(self):
-        return
-
-
-
-
+    def quit(self):
+        self._master.quit()
+        self._data.update_database()
 
 def app():
+    global root
     root = tk.Tk()
     root.geometry("700x600")
     root.resizable(0, 0)
 
-    FileMenu(root)
+    global dish_data
+    dish_data = DishData("Current Round.txt")
 
-    # path = filedialog.askopenfilename()
-    
-    dish_data = DishData()
+    FileMenu(root, dish_data)
 
+    global database_view
     database_view = DatabaseView(root, dish_data)
     database_view.pack(side=tk.LEFT, fill=tk.Y)
 
+    global chosen_view
     chosen_view = ChosenDishView(root)
     chosen_view.pack(side=tk.TOP, fill=tk.BOTH)
 
-    controller = Controller(root, dish_data, chosen_view)
+    global controller
+    controller = Controller(root, dish_data, database_view, chosen_view)
     controller.pack(side=tk.BOTTOM, fill=tk.BOTH, ipady=20)
 
     def on_closing():
+        """Prompt user the app is closing"""
         if messagebox.askokcancel("Quit", "Do you want to quit?"):
             dish_data.update_database()
             print("Bye 9 Bye")
